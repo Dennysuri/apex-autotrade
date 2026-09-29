@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mwathe Trade Systems</title>
+    <style>
+        :root {
+            --bg-black: #080b10;
+            --panel-dark: #101622;
+            --accent-orange: #ff9900;
+            --accent-green: #00c853;
+            --accent-skyblue: #00b0ff;
+            --text-main: #f5f5f5;
+            --text-muted: #9e9e9e;
+            --border-color: #1e293b;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { background-color: var(--bg-black); color: var(--text-main); height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+        
+        .view { display: none; width: 100%; height: 100%; flex-direction: column; }
+        .view.active { display: flex; }
+
+        #dashboard-view { align-items: center; justify-content: center; text-align: center; padding: 30px; background: radial-gradient(circle at center, #131c2e 0%, var(--bg-black) 100%); }
+        
+        .brand-logo-container { display: flex; flex-direction: column; align-items: center; margin-bottom: 25px; }
+        .logo-graphic { width: 84px; height: 84px; filter: drop-shadow(0 4px 16px rgba(0, 176, 255, 0.25)); margin-bottom: 16px; }
+        .logo-title { font-size: 26px; font-weight: 800; letter-spacing: 0.5px; background: linear-gradient(135deg, var(--accent-orange), var(--accent-green), var(--accent-skyblue)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+        .tagline { font-size: 15px; color: var(--text-muted); max-width: 440px; margin-bottom: 35px; line-height: 1.6; }
+        .btn-get-started { background: linear-gradient(135deg, #ff9900, #ffb733); color: #000; border: none; padding: 14px 45px; border-radius: 8px; font-size: 16px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 14px rgba(255,153,0,0.3); transition: 0.2s; }
+        .btn-get-started:hover { opacity: 0.95; transform: translateY(-1px); }
+
+        #navigation-view { align-items: center; justify-content: center; text-align: center; padding: 20px; }
+        .connect-card { background: var(--panel-dark); border: 1px solid var(--border-color); padding: 40px; border-radius: 12px; width: 100%; max-width: 420px; box-shadow: 0 8px 32px rgba(0,0,0,0.4); }
+
+        #trading-page { flex-direction: row; }
+        sidebar { width: 280px; background-color: var(--panel-dark); border-right: 1px solid var(--border-color); display: flex; flex-direction: column; }
+        .sidebar-header { padding: 20px; font-weight: 700; border-bottom: 1px solid var(--border-color); font-size: 14px; color: var(--accent-skyblue); display: flex; align-items: center; gap: 10px; }
+        .menu-list { list-style: none; padding: 15px; overflow-y: auto; flex-grow: 1; }
+        .menu-item { padding: 12px 16px; border-radius: 8px; cursor: pointer; color: var(--text-muted); font-size: 14px; margin-bottom: 6px; transition: 0.2s; font-weight: 500; }
+        .menu-item:hover, .menu-item.active { background-color: rgba(0, 176, 255, 0.12); color: var(--accent-skyblue); }
+        
+        main-content { flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; background: var(--bg-black); }
+        topbar { height: 65px; background-color: var(--panel-dark); border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: flex-end; padding: 0 30px; gap: 20px; }
+        .balance-display { font-size: 16px; font-weight: 700; color: var(--accent-green); }
+        .oauth-indicator { width: 9px; height: 9px; border-radius: 50%; background: var(--accent-green); box-shadow: 0 0 10px var(--accent-green); display: inline-block; }
+        
+        .workspace { padding: 30px; overflow-y: auto; flex-grow: 1; display: none; }
+        .workspace.active { display: block; }
+        
+        .panel-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; }
+        .card { background: var(--panel-dark); border: 1px solid var(--border-color); border-radius: 10px; padding: 24px; margin-bottom: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
+        .card h3 { font-size: 16px; margin-bottom: 18px; color: var(--text-main); font-weight: 600; }
+        
+        input, select { width: 100%; padding: 11px 14px; background: rgba(0,0,0,0.4); border: 1px solid var(--border-color); border-radius: 8px; color: #fff; margin-top: 6px; margin-bottom: 18px; outline: none; font-size: 14px; }
+        input:focus, select:focus { border-color: var(--accent-skyblue); }
+        label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.8px; font-weight: 600; }
+        .btn { background: var(--accent-orange); color: #000; border: none; padding: 12px 18px; border-radius: 8px; font-weight: 700; cursor: pointer; width: 100%; transition: 0.2s; }
+        .btn:hover { opacity: 0.9; }
+        .btn-green { background: var(--accent-green); color: #000; }
+        .btn-red { background: #ef4444; color: #fff; }
+    </style>
+</head>
+<body>
+
+    <div id="dashboard-view" class="view active">
+        <div class="brand-logo-container">
+            <svg class="logo-graphic" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect width="100" height="100" rx="24" fill="#101622" stroke="#223049" stroke-width="2"/>
+                <path d="M25 65L42 45L58 58L75 35" stroke="url(#paint0_linear)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="75" cy="35" r="6" fill="#00c853"/>
+                <defs>
+                    <linearGradient id="paint0_linear" x1="25" y1="65" x2="75" y2="35" gradientUnits="userSpaceOnUse">
+                        <stop stop-color="#ff9900"/>
+                        <stop offset="0.5" stop-color="#00c853"/>
+                        <stop offset="1" stop-color="#00b0ff"/>
+                    </linearGradient>
+                </defs>
+            </svg>
+            <div class="logo-title">Mwathe Trade Systems</div>
+        </div>
+        <p class="tagline">The ultimate professional automated trading engine powered by 100+ advanced indicators and institutional-grade strategies.</p>
+        <button class="btn-get-started" onclick="switchView('navigation-view')">Get Started</button>
+    </div>
+
+    <div id="navigation-view" class="view">
+        <div class="connect-card">
+            <h2 style="margin-bottom: 8px; font-size: 18px; color: #fff;">Deriv API Authorization</h2>
+            <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 25px;">Connect securely via OAuth 2.0 PKCE to initialize demo or live accounts.</p>
+            <button class="btn btn-green" onclick="startDerivOAuth()">Connect with Deriv</button>
+        </div>
+    </div>
+    <div id="trading-page" class="view">
+        <sidebar>
+            <div class="sidebar-header">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#00b0ff" stroke-width="2.5"><path d="M3 3v18h18"/><path d="M7 14l4-4 4 4 5-6"/></svg>
+                Mwathe Systems[span_2](start_span)[span_2](end_span)
+            </div>
+            <ul class="menu-list">
+                <li class="menu-item active" onclick="switchWorkspace('analysis-workspace', this)">📊 Analysis Tool[span_3](start_span)[span_3](end_span)</li>
+                <li class="menu-item" onclick="switchWorkspace('signals-workspace', this)">⚡ Signals (Locked)[span_4](start_span)[span_4](end_span)</li>
+                <li class="menu-item" onclick="switchWorkspace('denny-workspace', this)">🤖 Denny Bots[span_5](start_span)[span_5](end_span)</li>
+                <li class="menu-item" onclick="switchWorkspace('auto-bot-workspace', this)">⚙️ Automated Bot[span_6](start_span)[span_6](end_span)</li>
+                <li class="menu-item" onclick="switchWorkspace('autod-ai-workspace', this)">🧠 AutoD AI (Digits)[span_7](start_span)[span_7](end_span)</li>
+                <li class="menu-item" onclick="switchWorkspace('settings-workspace', this)">🔧 Settings[span_8](start_span)[span_8](end_span)</li>
+            </ul>
+        </sidebar>
+
+        <main-content>
+            <topbar>
+                <div style="display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-muted);">
+                    <span class="oauth-indicator"></span> OAuth Connected[span_9](start_span)[span_9](end_span)
+                </div>
+                <div class="balance-display" id="balanceDisplay">Balance: $0.00 USD[span_10](start_span)[span_10](end_span)</div>
+            </topbar>
+
+            <div id="analysis-workspace" class="workspace active">
+                <div class="panel-grid">
+                    <div class="card">
+                        <h3>Analysis Parameters[span_11](start_span)[span_11](end_span)</h3>
+                        <label>Trade Type[span_12](start_span)[span_12](end_span)</label>
+                        <select id="tradeTypeSelect" onchange="updateSubTrades()">
+                            <option value="Digits">Digits[span_13](start_span)[span_13](end_span)</option>
+                            <option value="Ups & Downs">Ups & Downs[span_14](start_span)[span_14](end_span)</option>
+                            <option value="Touch & No Touch">Touch & No Touch[span_15](start_span)[span_15](end_span)</option>
+                            <option value="Accumulators">Accumulators[span_16](start_span)[span_16](end_span)</option>
+                            <option value="Vanillas">Vanillas[span_17](start_span)[span_17](end_span)</option>
+                            <option value="Turbos">Turbos[span_18](start_span)[span_18](end_span)</option>
+                            <option value="Multipliers">Multipliers[span_19](start_span)[span_19](end_span)</option>
+                        </select>
+
+                        <label>Sub Trade Type[span_20](start_span)[span_20](end_span)</label>
+                        <select id="subTradeSelect">
+                            <option value="Over/Under">Over/Under[span_21](start_span)[span_21](end_span)</option>
+                            <option value="Even/Odd">Even/Odd[span_22](start_span)[span_22](end_span)</option>
+                            <option value="Matches/Differs">Matches/Differs[span_23](start_span)[span_23](end_span)</option>
+                        </select>
+
+                        <label>Analysis Duration (Seconds)[span_24](start_span)[span_24](end_span)</label>
+                        <input type="number" id="analysisDuration" value="30" min="1" max="59">
+
+                        <label>Last Digits to Analyze[span_25](start_span)[span_25](end_span)</label>
+                        <input type="number" id="lastDigitsCount" value="50">
+
+                        <button class="btn btn-green" onclick="startAnalysis()">Start Analysis[span_26](start_span)[span_26](end_span)</button>
+                        <button class="btn btn-red" style="margin-top: 10px;" onclick="stopAnalysis()">Stop Analysis[span_27](start_span)[span_27](end_span)</button>
+                    </div>
+
+                    <div class="card">
+                        <h3>Real-Time Charting & Telemetry[span_28](start_span)[span_28](end_span)</h3>
+                        <div style="height: 240px; background: #05070a; border: 1px solid var(--border-color); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: var(--text-muted); font-family: monospace; font-size: 13px;" id="chartTelemetry">
+                            Waiting for analysis start...[span_29](start_span)[span_29](end_span)
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="signals-workspace" class="workspace">
+                <div class="card">
+                    <h3>Active Signals Feed[span_30](start_span)[span_30](end_span)</h3>
+                    <div id="signalsFeed" style="color: var(--text-muted); font-size: 13px;">Signals locked until analysis is executed.[span_31](start_span)[span_31](end_span)</div>
+                </div>
+            </div>
+
+            <div id="denny-workspace" class="workspace">
+                <div class="card">
+                    <h3>Denny Bots Engine (Zero Consecutive Losses Guard)[span_32](start_span)[span_32](end_span)</h3>
+                    <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 15px;">Specialized sub-trade execution threads with advanced safeguards.</p>
+                    <button class="btn" onclick="alert('Denny Bot active for selected sub-trade.')">Deploy Denny Bot</button>
+                </div>
+            </div>
+
+            <div id="auto-bot-workspace" class="workspace">
+                <div class="card">
+                    <h3>Automated Trading Bot Configuration[span_33](start_span)[span_33](end_span)</h3>
+                    <label>Initial Stake ($)[span_34](start_span)[span_34](end_span)</label>
+                    <input type="number" value="1.00">
+                    <label>Target Profit ($)[span_35](start_span)[span_35](end_span)</label>
+                    <input type="number" value="10.00">
+                    <label>Stop Loss ($)[span_36](start_span)[span_36](end_span)</label>
+                    <input type="number" value="20.00">
+                    <button class="btn btn-green">Run Automated Bot[span_37](start_span)[span_37](end_span)</button>
+                </div>
+            </div>
+
+            <div id="autod-ai-workspace" class="workspace">
+                <div class="card" id="aiVaultCard">
+                    <h3>AutoD AI Security Vault[span_38](start_span)[span_38](end_span)</h3>
+                    <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px;">Enter master password (Denny@1249) to access AutoD AI[span_39](start_span)[span_39](end_span).</p>
+                    <input type="password" id="aiPassInput" placeholder="Password...">
+                    <button class="btn btn-green" onclick="unlockAutoDAI()">Unlock Vault[span_40](start_span)[span_40](end_span)</button>
+                </div>
+                <div class="card" id="aiDashboardCard" style="display:none;">
+                    <h3>AutoD AI Autonomous Core[span_41](start_span)[span_41](end_span)</h3>
+                    <p style="color: var(--accent-green); font-size: 13px; margin-bottom: 15px;">Vault Unlocked. Ready for high-speed Digit Over/Under execution[span_42](start_span)[span_42](end_span).</p>
+                    <button class="btn btn-green">Run AutoD AI[span_43](start_span)[span_43](end_span)</button>
+                </div>
+            </div>
+
+            <div id="settings-workspace" class="workspace">
+                <div class="card">
+                    <h3>System Settings[span_44](start_span)[span_44](end_span)</h3>
+                    <label>Chart Theme[span_45](start_span)[span_45](end_span)</label>
+                    <select><option>Dark Mode[span_46](start_span)[span_46](end_span)</option><option>Light Mode[span_47](start_span)[span_47](end_span)</option><option>High Contrast[span_48](start_span)[span_48](end_span)</option></select>
+                    <button class="btn" onclick="startDerivOAuth()">Re-authorize Deriv Session[span_49](start_span)[span_49](end_span)</button>
+                </div>
+            </div>
+
+        </main-content>
+    </div>
+
+    <script>
+        const CLIENT_ID = '349eTg55tt6ZVaefjBIAH';
+
+        function switchView(viewId) {
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.getElementById(viewId).classList.add('active');
+        }
+
+        function switchWorkspace(workspaceId, element) {
+            document.querySelectorAll('.workspace').forEach(w => w.classList.remove('active'));
+            document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
+            document.getElementById(workspaceId).classList.add('active');
+            element.classList.add('active');
+        }
+
+        async function startDerivOAuth() {
+            const array = crypto.getRandomValues(new Uint8Array(64));
+            const codeVerifier = Array.from(array).map(v => 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~'[v % 66]).join('');
+            const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(codeVerifier));
+            const codeChallenge = btoa(String.fromCharCode(...new Uint8Array(digest))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+            const state = crypto.getRandomValues(new Uint8Array(16)).reduce((s, b) => s + b.toString(16).padStart(2, '0'), '');
+            sessionStorage.setItem('pkce_code_verifier', codeVerifier);
+            sessionStorage.setItem('oauth_state', state);
+            const redirectUri = window.location.origin + window.location.pathname;
+            window.location.href = `https://auth.deriv.com/oauth2/auth?response_type=code&client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=trade+account_manage&state=${state}&code_challenge=${codeChallenge}&code_challenge_method=S256`;
+        }
+
+        function unlockAutoDAI() {
+            const pass = document.getElementById('aiPassInput').value;
+            if (pass === 'Denny@1249') {
+                document.getElementById('aiVaultCard').style.display = 'none';
+                document.getElementById('aiDashboardCard').style.display = 'block';
+            } else {
+                alert('Invalid password! Required: Denny@1249');
+            }
+        }
+
+        function updateSubTrades() {
+            const tradeType = document.getElementById('tradeTypeSelect').value;
+            const subSelect = document.getElementById('subTradeSelect');
+            subSelect.innerHTML = '';
+            
+            let options = [];
+            if (tradeType === 'Digits') options = ['Over/Under', 'Even/Odd', 'Matches/Differs'];
+            else if (tradeType === 'Ups & Downs') options = ['Rise/Fall', 'Higher/Lower'];
+            else if (tradeType === 'Touch & No Touch') options = ['Touch/No Touch'];
+            else if (tradeType === 'Vanillas') options = ['Call/Put'];
+            else options = [tradeType];
+
+            options.forEach(opt => {
+                const el = document.createElement('option');
+                el.value = opt;
+                el.textContent = opt;
+                subSelect.appendChild(el);
+            });
+        }
+
+        function startAnalysis() {
+            document.getElementById('chartTelemetry').innerHTML = 'Analyzing all volatility indices via 100+ indicators...[span_50](start_span)[span_50](end_span)';
+        }
+
+        function stopAnalysis() {
+            document.getElementById('chartTelemetry').innerHTML = 'Analysis stopped by user.[span_51](start_span)[span_51](end_span)';
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const params = new URLSearchParams(window.location.search);
+            if (params.get('code')) {
+                switchView('trading-page');[span_52](start_span)[span_52](end_span)
+            }
+        });
+    </script>
+</body>
+</html>
